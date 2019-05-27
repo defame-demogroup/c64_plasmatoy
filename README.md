@@ -1,6 +1,7 @@
 # c64_plasmatoy
 
-This is a release version of the 1.0 Plasmatoy 
+This is a release version of the 1.0 Plasmatoy released at Syntax 2018 https://csdb.dk/release/?id=171349
+
 
 Use function keys to change effects
 
