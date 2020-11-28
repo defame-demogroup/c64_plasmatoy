@@ -1,7 +1,8 @@
+.align $100
 .pc=* "PLASMA_TABLES"
 plasmaSine:
 {
-	.var amplitude = 50
+	.var amplitude = 25
 	.var frequency = 128
 	table:
 	.for (var j=0; j<256;j++) { 	
@@ -15,7 +16,7 @@ plasmaSine:
 
 plasmaCos:
 {
-	.var amplitude = 50
+	.var amplitude = 25
 	.var frequency = 128
 	table:
 	.for (var j=0; j<256;j++) { 	
@@ -25,4 +26,16 @@ plasmaCos:
 			.byte amplitude+amplitude * cos(toRadians( 360/frequency * j))
 		}	
 	}
+}
+
+plasmaColors:
+{
+	.fill $20, $0e
+	.fill $20, $06
+	.fill $20, $06
+	.fill $20, $0e
+	.fill $20, $0e
+	.fill $20, $06
+	.fill $20, $06
+	.fill $20, $0e
 }

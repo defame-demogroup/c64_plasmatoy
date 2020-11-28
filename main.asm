@@ -9,31 +9,26 @@
 Parameters
 */
 .var scrollYOffset = 8
-.var scrollFgColor = $0c
-.var scrollBgColor = $00
+.var scrollFgColor = $40
+.var scrollBgColor = $80
 /*
 ZEROPAGE
 */
-.var scrollTextPointer = $37
-.var scrollBytePointer = $38
+.var scrollTextPointer = $c0
+.var scrollBytePointer = $c1
 
-.var scrollFontLo = $39
-.var scrollFontHi = $3a
-
+.var scrollFontLo = $c2
+.var scrollFontHi = $c3
 
 .pc =$0801 "Basic Upstart Program"
 :BasicUpstart($2800)
 
-
-
 //---------------------------------------------------------
 .var bufA = $0400
 .var mapA = %00011000
-.var bufB = $0800
-.var mapB = %00101000
 
 
-.var music = LoadSid("Out_of_Notes_V1_5.sid")
+.var music = LoadSid("Run-Mild.sid")
 .pc = $2800 "Main Program"
 start:
 			ldx #0
@@ -41,7 +36,6 @@ start:
 			.for(var i=0; i<4; i++) {
 				lda #$0b
 				sta bufA+i*$100,x
-				sta bufB+i*$100,x
 				sta $d800+i*$100,x
 			}
 			inx
@@ -80,12 +74,13 @@ start:
 			sta $d010
 			sta $d017
 			sta $d01d
-
+			
+			lda #$ff
+			sta $39ff
 
 			.for(var i=0;i<8;i++){
 				lda #($c4 + i)
 				sta $0800-$08 + i
-				sta $0c00-$08 + i
 			}
 
 			lda #$00
@@ -107,11 +102,12 @@ start:
 			sta scrollBytePointer
 			sta scrollTextPointer
 
-			ldx #0
-			ldy #0
-			lda #music.startSong-1
-			jsr music.init	
 			sei
+			ldx #$00
+			ldy #$00
+			lda #$00
+			jsr music.init	
+
 			lda #<irq1
 			sta $0314
 			lda #>irq1
@@ -142,13 +138,11 @@ start:
 			
 			lda #%00110110	// Disable KERNAL and BASIC ROM and enable cass. motor
 			sta $01
-						
+					
 			cli
-			
-			lda #$02
-			sta ready
-			
-this:		jsr runPlasma
+						
+this:		
+			jsr runPlasma 
 			jmp this
 //---------------------------------------------------------
 irq1:  	
@@ -156,34 +150,15 @@ irq1:
 			lda #%01011011
 			sta $d011
 !loop:
-	lda $d012
-	cmp #$fa
-	bne !loop-
+			lda $d012
+			cmp #$fa
+			bne !loop-
 			lda #%01010011
 			sta $d011
-			jsr music.play 
 
-//double buffer switching...
-			lda ready //#$00 not ready yet
-			beq notready
-			inc ready //#$02 drawn frame
-			lda toggle
-			beq setMapB
-			lda #$00
-			sta toggle
-			lda #mapA
-			jmp done	
-setMapB:	inc toggle
-			lda #mapB
-done:		sta $d018
-notready:
-			lda TOGGLE_STATE
-			bne !skip+
-			jsr funcScroller
-			jmp !done+
-!skip:
-			jsr funcClearScroller
-!done:
+			jsr funcScrollSprite
+			jsr music.play
+
 			jsr funcKeys
 			jsr funcDrawValues
 			jsr funcFadeSprites
@@ -219,7 +194,6 @@ funcKeys:
 	sta LAST_EVENT + 2
 	cmp #$ff
 	beq NoNewAphanumericKey
-	jsr funcToggleVisibleThings
 	rts
 NoNewAphanumericKey:
 	cpx #$10
@@ -315,32 +289,6 @@ NoNewAphanumericKey:
 LAST_EVENT:
 .byte $00, $00, $00
 
-TOGGLE_STATE:
-.byte $00
-//00 everything
-//ff nothing
-
-funcToggleVisibleThings:
-	lda TOGGLE_STATE
-	eor #$ff
-	sta TOGGLE_STATE
-!skip:
-	rts
-
-CLEAR_STATE:
-.byte $00
-
-funcClearScroller:
-	ldx CLEAR_STATE
-	lda #$0b
-	sta $d800 + (scrollYOffset * $28),x
-	sta $d900 + (scrollYOffset * $28),x
-	txa
-	clc
-	adc #$29 //#$07
-	sta CLEAR_STATE
-	rts
-
 funcFadeSprites:
 	inc SPRITE_COLOR_DELAY
 	lda SPRITE_COLOR_DELAY
@@ -369,12 +317,12 @@ funcFadeSprites:
 	rts
 
 SPRITE_COLORS:
-.byte $00, $0b, $06, $04, $0c, $0e, $0f, $03
-.byte $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
-.byte $03, $0f, $0e, $0c, $04, $06, $0b, $00
-.byte $00, $00, $00, $00
+.byte $09, $09, $08, $08, $07, $07, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
+.byte $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $0d, $0d, $0c, $0c, $05, $05
+
 SPRITE_COLORS_PTR:
 .byte $00
+
 SPRITE_COLOR_DELAY:
 .byte $00
 
@@ -410,25 +358,25 @@ funcDrawValues:
 	lda offset1
 	adc #$30
 	ldx #$05
-	ldy #$02
+	ldy #$01
 	jsr funcDrawCharOnSprite
 	clc
 	lda offset2
 	adc #$30
 	ldx #$09
-	ldy #$02
+	ldy #$01
 	jsr funcDrawCharOnSprite
 	clc
 	lda offset3
 	adc #$30
 	ldx #$0d
-	ldy #$02
+	ldy #$01
 	jsr funcDrawCharOnSprite
 	clc
 	lda PLASMA_SELECT_PTR
 	adc #$30
 	ldx #$15
-	ldy #$02
+	ldy #$01
 	jsr funcDrawCharOnSprite
 	rts
 
@@ -437,21 +385,14 @@ funcDrawSettings:
 	ldy #> LABEL1
 	lda #$00
 	jsr funcDrawStringLine
-	ldx #< LABEL2
-	ldy #> LABEL2
-	lda #$01
-	jsr funcDrawStringLine
 	ldx #< LABEL3
 	ldy #> LABEL3
-	lda #$02
+	lda #$01
 	jsr funcDrawStringLine
 	rts
 
 LABEL1:
-	.text " defame plasmatoy v1.0  "
-	.byte $00
-LABEL2:
-	.text "play with function keys "
+	.text " defame plasmatoy v2.0  "
 	.byte $00
 LABEL3:
 	.text "zoom=1 x=1 y=1 color=1  "
@@ -533,7 +474,6 @@ funcDrawCharOnSprite:
 	ldy sSaveY: #$00
 	rts
 
-
 SPRFONTXOFFSETS:
 	.for(var i=0;i<8;i++){
 			.word $3100 + (i * $40)
@@ -546,136 +486,163 @@ SPRFONTXOFFSETS:
 SPRFONT:
 .import c64 "delta.prg"
 
-
-
-
-
-
 .pc=$3100 "SPRITES"
 SPR:
 .fill $40 * 8, $00
 
-.pc=$3300 "SCROLLCODE"
+CHRBUF:
+.fill $08, $00
 
-currentChar:
-.fill $09, $00
-
-shadowBuffer:
-.fill $09, $00
-
-noShadowBuffer:
-.fill $09, $0b
-
-.pc=* "DEBUG"
-funcScroller:
-	.for(var i=0;i<$28;i++){
-		.if((*<$39ff) && ((*+(6*9))>$39ff)) {
-			.print toHexString(*) + " i " + i
-			jmp !skip+
-			.for(var j=0;j<34;j++){
-				.byte $ff
-			}
-		}
-		!skip:
-		.for(var j=0;j<9;j++){
-			lda $d800 + ((j+scrollYOffset) * $28) + (i + 1)
-			sta $d800 + ((j+scrollYOffset) * $28) + i
-		}
-
-	}
-	ldx scrollBytePointer
-	bne !currentChar+
-	jmp !newChar+
-!currentChar:
-	inx
-	cpx #$08
-	bne !skip+
-	//reset char
-	ldx #$00
-!skip:
-	stx scrollBytePointer
-	lda #$0b
-	.for(var i=0;i<9;i++){
-		sta shadowBuffer + i
-	}
-	.for (var i=1;i<9;i++){
-		lda noShadowBuffer + (i -1)
-		cmp #scrollFgColor
-		bne !skip+
-		lda #scrollBgColor
-		sta shadowBuffer + i		
-!skip:
-	}
-	.for(var i=0;i<9;i++){
-		lda #$0b
-		sta noShadowBuffer + i
-	}
-	.for (var i=0;i<8;i++){
-		clc
-		asl currentChar + i
-		bcs !draw+
-		jmp !done+
-!draw:
-		lda #scrollFgColor
-		sta shadowBuffer + i
-		sta noShadowBuffer + i		
-!done:
-	}
-	.for (var i=0;i<9;i++){
-		lda shadowBuffer + i
-		sta $d800 + ((i+scrollYOffset) * $28) + $27
-	}
-	rts
-!newChar:
-	lda #$00
-	sta OffsetHi
-	ldx scrollTextPointer
-	inc scrollTextPointer
-	lda SCROLLTEXT,x
-	bne !skip+
-	ldx #$00
-	sta scrollTextPointer
-	lda SCROLLTEXT,x
-!skip:
-	clc
-	asl 
-	rol OffsetHi
-	asl
-	rol OffsetHi
-	asl
-	rol OffsetHi
-	sta scrollFontLo
-	clc
-	lda OffsetHi: #$00
-	adc #>FONT
-	sta scrollFontHi
-	ldy #$00
-!loop:
-	lda (scrollFontLo),y
-	sta currentChar,y
-	iny
-	cpy #$08
-	bne !loop-
-	lda #$00
-	sta currentChar,y
-	ldx #$00
-	jmp !currentChar-
-	rts
-
-SCROLLTEXT:
-.text "                       plasmatoy by zig of defame.   music by wisdom.     thanks to conjuror from onslaught for the plasma ideas.       greetz to all lovely peeps we know.   use f-keys to play with settings.  press other keys to hide scroller.   "
+CHRCNT:
 .byte $00
-
-.align $100
-.pc=* "FONT DATA"
-FONT:
-.import c64 "font.prg"
-
-.byte $ff
 
 //Music	$1000-2000
 //---------------------------------------------------------
 .pc=music.location "Music"
 .fill music.size, music.getData(i)
+.var spriteyoff=12
+.pc=$4000
+funcScrollSprite:
+	.for(var y=1;y<7;y++){
+		asl CHRBUF + y
+		.for(var i=7;i>=0;i--){
+			.for(var x=2;x>=0;x--){
+				rol $3100 + (i * $40) + ((y+spriteyoff) * 3) + x
+			}
+		}
+	}
+	ldx CHRCNT
+	inx
+	cpx #$08
+	beq !newChar+
+	stx CHRCNT
+	rts
+!newChar:
+	lda #$00
+	sta CHRCNT
+	lda #$00
+	sta ScrollOffsetHi
+	lda scrollptr: SCROLLTEXT
+	sta endprt
+	cmp #$00 //end marker
+	bne !skip+
+	lda #$20 //space char
+!skip:
+	asl 
+	rol ScrollOffsetHi
+	asl
+	rol ScrollOffsetHi
+	asl
+	rol ScrollOffsetHi
+	sta scrollFontLo
+	clc
+	lda ScrollOffsetHi: #$00
+	adc #>SPRFONT
+	sta scrollFontHi
+	ldy #$00
+	ldx #$00
+!loop:
+	lda (scrollFontLo),y
+	sta CHRBUF,x
+	inx
+	iny
+	cpy #$07
+	bne !loop-
+	inc scrollptr
+	bne !skip+
+	inc scrollptr + 1
+!skip:
+	lda endprt: #$00
+	cmp #$00
+	bne !skip+
+	lda #>SCROLLTEXT
+	sta scrollptr + 1
+	lda #<SCROLLTEXT
+	sta scrollptr
+!skip:
+	rts
+
+SCROLLTEXT:
+.text "welcome back! after a couple of years its time for version 2 of the plasmatoy..."
+.text " use f1 and f2 to change the zoom, use f3 and f4 to change x speed, use f5 and f6 to change y speed,"
+.text " use f7 and f8 to change plasma colors.  this spicy version of plasmatoy has more colors with that smooth"
+.text " plasma flavour. credits: code by zig and voltage of defame during syntax party. music is 'run mild' by coax of topaz beerline. "
+.text " ...if you would like to get in touch, send an email to: joe at pixolut.com ... greets need to go out to: "
+.text "chrome, "
+.text "disaster area, "
+.text "digital access, "
+.text "cygnus oz, "
+.text "duck and chicken, "
+.text "ikon visual, "
+.text "jimage, "
+.text "the force, "
+.text "desire, "
+.text "0f.digital, "
+.text "aday, "
+.text "onslaught, "
+.text " ...and the international greets..."
+.text "abyss connection, "
+.text "amnesty, "
+.text "artstate, "
+.text "arise, "
+.text "arsenic, "
+.text "atlantis, "
+.text "artline designs, "
+.text "bonzai, "
+.text "booze, "
+.text "camelot, "
+.text "censor, "
+.text "chorus, "
+.text "cosine, "
+.text "crest, "
+.text "dekadence, "
+.text "digital excess, "
+.text "delysid, "
+.text "elysium, "
+.text "excess, "
+.text "extend, "
+.text "exon, "
+.text "fairlight, "
+.text "focus, "
+.text "fossil, "
+.text "genesis-project, "
+.text "hitmen, "
+.text "hack n' trade, "
+.text "hoaxers, "
+.text "hokuto force, "
+.text "laxity, "
+.text "lepsi developments, "
+.text "level 64, "
+.text "maniacs of noise, "
+.text "multistyle labs, "
+.text "mayday, "
+.text "noice, "
+.text "nah kolor, "
+.text "nostalgia, "
+.text "offence, "
+.text "origo dreamline, "
+.text "oxyron, "
+.text "padua, "
+.text "panda design, "
+.text "pegboard nerds, "
+.text "plush, "
+.text "prosonix, "
+.text "resource, "
+.text "role, "
+.text "samar, "
+.text "shape, "
+.text "success + trc, "
+.text "svenonacid, "
+.text "the dreams, "
+.text "the solution, "
+.text "triad, "
+.text "trsi, "
+.text "vibrants, "
+.text "vision, "
+.text "viruz, "
+.text "wrath, "
+.text "x-ample ...    "
+.byte $00
+
 
 

@@ -1,0 +1,66 @@
+.label desRow=$2d4c
+.label funcDrawCharOnSprite=$2d5d
+.label KeyInRow=$2ac6
+.label funcDrawSettings=$2cfc
+.label OverFlow=$2b0e
+.label Buffer=$2cc4
+.label SimultaneousAlphanumericKeysFlag=$2cc9
+.label ReadKeyboard=$2ac3
+.label BufferEmpty=$2c5e
+.label sSaveX=$2db9
+.label sSaveY=$2dbb
+.label funcFadeSprites=$2a20
+.label srcString=$2d4e
+.label SPRITE_COLOR_DELAY=$2a7c
+.label LAST_EVENT=$2a1d
+.label runPlasma=$4822 {
+}
+.label endprt=$4211
+.label toggle=$4800
+.label NoActivityDetected=$2b16
+.label plasmaCos=$b300 {
+}
+.label ControlPort=$2b28
+.label ScrollOffsetHi=$41f4
+.label PLASMA_SELECT_PTR=$2a9a
+.label tmpChar=$2d7c
+.label SCROLLTEXT=$4221
+.label SPR=$3100
+.label BufferQuantity=$2cc8
+.label this=$292a
+.label SPRFONT=$2e00
+.label initPlasma=$4802 {
+  .label clrplasmavals=$481c
+}
+.label NoNewAphanumericKey=$298e
+.label SPRITE_COLORS=$2a59
+.label BufferOld=$2cc1
+.label LABEL3=$2d28
+.label LABEL1=$2d0f
+.label PLASMA_C4=$2ab9
+.label TooManyNewKeys=$2c75
+.label PLASMA_C3=$2aaf
+.label PLASMA_C2=$2aa5
+.label PLASMA_C1=$2a9b
+.label funcDrawValues=$2cca
+.label SpriteOffsetHi=$2d8d
+.label plasmaSine=$b200 {
+}
+.label Exist=$2c41
+.label KeyFound=$2afe
+.label ready=$4801
+.label spriteTop=$2dae
+.label plasmaColors=$b400 {
+}
+.label CHRBUF=$3300
+.label KeyTable=$2c81
+.label funcDrawStringLine=$2d41
+.label Return=$2c60
+.label funcKeys=$295c
+.label scrollptr=$41d9
+.label start=$2800
+.label SPRITE_COLORS_PTR=$2a7b
+.label CHRCNT=$3308
+.label irq1=$2930
+.label funcFadePlasmaColor=$2a7d
+.label Main=$2b2c

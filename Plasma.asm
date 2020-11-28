@@ -1,28 +1,29 @@
-.pc= $4100 "PLASMA CODE"
+.pc= $4800 "PLASMA CODE"
 .var height = 25
 
 .var bufferA = $0400
-.var bufferB = $0800
 
 .var charHeight = 1
 .var border = 0
 .var width = 40
 
-.var tpos1=$2b
-.var tpos2=$2c
-.var tpos3=$2d
-.var pos1=$2e
-.var pos2=$2f
-.var pos3=$30
-.var tpos3v=$31
-.var xReg=$32
-.var yReg=$33
-.var plasmaValues=$40
-.var bufferPointer=$41
+.var tpos1=$40
+.var tpos2=$41
+.var tpos3=$42
+.var pos1=$43
+.var pos2=$44
+.var pos3=$45
+.var tpos3v=$46
+.var xReg=$47
+.var yReg=$48
+.var plasmaValues=$49
+.var bufferPointer=$4a
 
-.var offset1 = $34
-.var offset2 = $35
-.var offset3 = $36
+.var tmpx = $4b
+
+.var offset1 = $4c
+.var offset2 = $4d
+.var offset3 = $4e
 
 toggle: 
 	.byte $00
@@ -54,18 +55,7 @@ clrplasmavals:
 	
 //;--------------------------------------------------------------------------------------------------------------------------------			
 
-runPlasma: {
-	clc
-	lda ready
-	cmp #$02
-	beq frameUpdated
-	rts	
-frameUpdated:	
-	lda toggle
-	bne goDrawA
-	jmp goDrawB
-	
-goDrawA:
+runPlasma: {	
 	clc
 	:startPlasma()
 	:endLineStep()
@@ -77,25 +67,13 @@ goDrawA:
 	}
 	:endPlasma()
 	rts	
-
-goDrawB:
-	clc
-	:startPlasma()
-	:endLineStep()
-	.for (var line = 0 ; line < height ; line++) {
-	    :startLineStep()
-	    	:drawPlasmaLineB(line,width)
-		:endLineStep()
-	}
-	:endPlasma()
-	rts	
 }
-
 //;--------------------------------------------------------------------------------------------------------------------------------			
 
 .macro drawPlasmaLineA(line,width) {
 	sty yReg
 	.var screen = $0400 + [line * $28]
+	.var cmem = $d800 + [line * $28]
 	ldx tpos1 
 	ldy tpos2
 	.for (var i = 0 ; i < width; i++) {	
@@ -103,39 +81,20 @@ goDrawB:
 		lda tpos3v 
 		adc plasmaCos,x 
 		adc plasmaCos,y
-		clc	
 		iny 
 		inx 
+		stx tmpx
 		sta screen + i
+		tax
+		lda plasmaColors,x
+		sta cmem + i
+		ldx tmpx
 		iny
 	 }
 	stx tpos1 
 	sty tpos2
 	ldy yReg
 }
-
-.macro drawPlasmaLineB(line,width) {
-	sty yReg
-	.var screen = $0800 + [line * $28]
-	ldx tpos1 
-	ldy tpos2
-	.for (var i = 0 ; i < width; i++) {	
-		clc 
-		lda tpos3v 
-		adc plasmaCos,x 
-		adc plasmaCos,y
-		clc	
-		iny 
-		inx 
-		sta screen + i
-		iny
-	 }
-	stx tpos1 
-	sty tpos2
-	ldy yReg
-}
-
-
 
 .macro startLineStep() {
 	lda pos1 
