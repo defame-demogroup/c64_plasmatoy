@@ -2,7 +2,7 @@
 .pc=* "PLASMA_TABLES"
 plasmaSine:
 {
-	.var amplitude = 25
+	.var amplitude = 24
 	.var frequency = 128
 	table:
 	.for (var j=0; j<256;j++) { 	
@@ -16,7 +16,7 @@ plasmaSine:
 
 plasmaCos:
 {
-	.var amplitude = 25
+	.var amplitude = 26
 	.var frequency = 128
 	table:
 	.for (var j=0; j<256;j++) { 	
@@ -30,12 +30,18 @@ plasmaCos:
 
 plasmaColors:
 {
+pc1a:
 	.fill $20, $0e
+pc2:
 	.fill $20, $06
 	.fill $20, $06
+pc3:
 	.fill $20, $0e
 	.fill $20, $0e
+pc4:
 	.fill $20, $06
 	.fill $20, $06
+pc1b:
 	.fill $20, $0e
 }
+

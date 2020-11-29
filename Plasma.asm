@@ -1,4 +1,4 @@
-.pc= $4800 "PLASMA CODE"
+.pc= * "PLASMA CODE"
 .var height = 25
 
 .var bufferA = $0400
