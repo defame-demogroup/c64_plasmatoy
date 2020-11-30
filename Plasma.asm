@@ -17,7 +17,6 @@
 .var xReg=$47
 .var yReg=$48
 .var plasmaValues=$49
-.var bufferPointer=$4a
 
 .var tmpx = $4b
 
@@ -45,11 +44,11 @@ initPlasma: {
 	sta offset2
 	sta offset3
 	
-	ldx #width 
-clrplasmavals:	
-	sta plasmaValues,x
-	dex
-	bne clrplasmavals
+// 	ldx #width 
+// clrplasmavals:	
+// 	sta plasmaValues,x
+// 	dex
+// 	bne clrplasmavals
 	rts
 }
 	
@@ -59,7 +58,8 @@ runPlasma: {
 	clc
 	:startPlasma()
 	:endLineStep()
-  //  lda pos3 sta tpos3
+    lda pos3 
+	sta tpos3
 	.for (var line = 0 ; line < height ; line++) {
 	    :startLineStep()
 	    	:drawPlasmaLineA(line,width)
@@ -80,7 +80,7 @@ runPlasma: {
 		clc 
 		lda tpos3v 
 		adc plasmaCos,x 
-		adc plasmaCos,y
+		adc plasmaSine,y
 		iny 
 		inx 
 		stx tmpx
@@ -109,13 +109,12 @@ runPlasma: {
 	adc offset1
 	sta tpos3
 	tax
-   	lda plasmaCos,x 
-   	sta tpos3v	
+   	lda plasmaSine,x 
+   	sta tpos3v
 }                    
 
 .macro startPlasma() {
 	lda #$00
-	sta ready
     lda pos3 
     sta tpos3            
 }
@@ -129,8 +128,6 @@ runPlasma: {
 	lda pos3
 	adc offset3
 	sta pos3
-
-    inc ready
 }
 
 //;--------------------------------------------------------------------------------------------------------------------------------			

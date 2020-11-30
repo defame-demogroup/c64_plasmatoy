@@ -77,6 +77,9 @@ LABELD:
 LABELE:
 	.text "$0  : plasma color 8    "
 	.byte $00
+LABELF:
+	.text "$0  : plasma preset     "
+	.byte $00
 
 
 //x lo

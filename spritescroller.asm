@@ -32,7 +32,7 @@ funcScrollSpriteNewChar:
 	sta ScrollOffsetHi
 	lda scrollptr: SCROLLTEXT
 	sta endprt
-	cmp #$00 //end marker
+	cmp #$ff //end marker
 	bne !skip+
 	lda #$20 //space char
 !skip:
@@ -61,7 +61,7 @@ funcScrollSpriteNewChar:
 	inc scrollptr + 1
 !skip:
 	lda endprt: #$00
-	cmp #$00
+	cmp #$ff
 	bne !skip+
 	lda #>SCROLLTEXT
 	sta scrollptr + 1
@@ -72,11 +72,11 @@ funcScrollSpriteNewChar:
 
 SCROLLTEXT:
 .text "welcome back! after a couple of years its time for version 2 of the plasmatoy..."
-.text " f1/f2 to change the zoom, f3/ f4 to change x speed, f5/f6 to change y speed,"
+.text " f1/f2 to change the zoom, f3/f4 to change x speed, f5/f6 to change y speed, f7/f8 to choose pretty presets -"
 .text " use number keys 1-8 to change plasma colors - shift 1-8 to decrement.  this spicy version of plasmatoy has 80% more colors"
 .text " with that smooth ecm plasma taste you have come to expect..." 
 .text " credits: code by zig and voltage of defame during syntax party 2020. music is 'run mild' by coax of topaz beerline. "
-.text " ...if you would like to get in touch, send an email to: joe at pixolut.com ... greets need to go out to: "
+.text " ...if you would like to get in touch, send an email to: joe@pixolut.com ... greets need to go out to: "
 .text "chrome, "
 .text "disaster area, "
 .text "digital access, "
@@ -151,4 +151,4 @@ SCROLLTEXT:
 .text "viruz, "
 .text "wrath, "
 .text "x-ample ...    "
-.byte $00
+.byte $ff
