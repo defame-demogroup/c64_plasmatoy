@@ -29,13 +29,10 @@ ZEROPAGE
 
 .pc = $4000 "Main Program"
 start:
-			sei
-			lda #$00
-			sta $d020
-			sta $d021
-			lda #%00110110	// Disable KERNAL and BASIC ROM and enable cass. motor
-			sta $01
-						
+			.for(var i=0;i<8;i++){
+				lda #($c4 + i)
+				sta $0800-$08 + i
+			}	
 			lda #$ff
 			sta $d015
 			lda #$01
@@ -47,18 +44,15 @@ start:
 			sta $d00b
 			sta $d00d
 			sta $d00f
-
 			lda #$00
+			sta $d020
+			sta $d021
 			sta $d017
+			sta $d01c
 			lda #$ff
 			sta $d01d
-			
 			lda #$ff
 			sta $39ff
-
-			lda #$00
-			sta $d01c
-
 			lda #$01
 			sta $d027
 			sta $d028
@@ -68,12 +62,30 @@ start:
 			sta $d02c
 			sta $d02d
 			sta $d02e			
+			lda $dd00
+			and #%11111100
+			ora #%00000011 
+			sta $dd00			
+			lda #mapA
+			sta $d018
+			lda #$08
+			sta $d016
 
+			sei
+			lda #%00110110	// Disable KERNAL and BASIC ROM and enable cass. motor
+			sta $01
+			jsr initPlasma
 			ldx #$00
 			ldy #$00
 			lda #$00
 			jsr music.init	
-
+			//bank selection
+			lda #$f0
+			sta $d012
+			lda #$81
+			sta $d01a
+			lda #%01011011
+			sta $d011
 			lda #<irq1
 			sta $0314
 			lda #>irq1
@@ -81,40 +93,8 @@ start:
 			asl $d019
 			lda #$7b
 			sta $dc0d
-			
-			//bank selection
-			lda $DD00
-			and #%11111100
-			ora #%00000011 
-			sta $DD00
-			
-			lda #mapA
-			sta $d018
-					
-			lda #$81
-			sta $d01a
-			lda #%01011011
-			sta $d011
-			lda #$08
-			sta $d016
-!jb:
-			lda $d012
-			cmp #$ff
-			bne !jb-
-			lda #$f0
-			sta $d012
-			
-			jsr initPlasma
-			jsr funcDrawSettings
-
-			.for(var i=0;i<8;i++){
-				lda #($c4 + i)
-				sta $0800-$08 + i
-			}
 			cli
-			nop
-			nop
-			nop
+			jsr funcDrawSettings
 this:		
 			jsr runPlasma 
 			jmp this
